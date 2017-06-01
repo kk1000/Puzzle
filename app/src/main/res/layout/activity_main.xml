@@ -6,6 +6,7 @@
     >
 
     <chars.com.puzzle.view.PuzzleLayout
+        android:id="@+id/id_puzzle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:padding="3dp"

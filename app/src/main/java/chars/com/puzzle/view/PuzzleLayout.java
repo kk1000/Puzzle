@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -57,6 +58,59 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
      * 游戏面板宽度、高度
      */
     private int mWidth;
+
+    private boolean isGameSuccess;
+
+    public  interface PuzzleListener{
+        void nextLevel(int nextLevel);
+        void timeChanged(int currentTime);
+        void gameOver();
+    }
+
+    public PuzzleListener mListener;
+
+
+    public PuzzleListener getmListener() {
+        return mListener;
+    }
+
+    public void setmListener(PuzzleListener mListener) {
+        this.mListener = mListener;
+    }
+
+    private int level = 1;
+    private static final int TIME_CHANGED = 0x110;
+    private static final int NEXT_LEVEL = 0x111;
+
+    // 是否开启时间
+    private boolean isTimeEnabled = false;
+
+    public boolean isTimeEnabled() {
+        return isTimeEnabled;
+    }
+
+    public void setTimeEnabled(boolean timeEnabled) {
+        isTimeEnabled = timeEnabled;
+    }
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(android.os.Message msg){
+            switch (msg.what){
+                case TIME_CHANGED:
+                    break;
+                case NEXT_LEVEL:
+                    level += 1;
+                    if (mListener != null){
+                        mListener.nextLevel(level);
+                    } else {
+                        nextLevel();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        };
+    };
 
     public PuzzleLayout(Context context) {
         this(context, null);
@@ -278,6 +332,7 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         if (isSuccess) {
             Log.e(TAG, "checkSuccess: sucess");
             Toast.makeText(getContext(), "Success, level up", Toast.LENGTH_LONG).show();
+            mHandler.sendEmptyMessage(NEXT_LEVEL);
         }
     }
 
@@ -304,5 +359,14 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
             mAnimateLayout = new RelativeLayout(getContext());
             addView(mAnimateLayout);
         }
+    }
+
+    public void nextLevel(){
+        this.removeAllViews();
+        mAnimateLayout = null;
+        mColumn++;
+        isGameSuccess = false;
+        initBitmap();
+        initItem();
     }
 }
