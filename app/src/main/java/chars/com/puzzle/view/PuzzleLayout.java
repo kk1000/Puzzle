@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -156,6 +158,8 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
 
     private ImageView mFirst;
     private ImageView mSecond;
+    // 动画层
+    private RelativeLayout mAnimateLayout;
 
     @Override
     public void onClick(View v) {
@@ -181,6 +185,56 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
      */
     private void exchangeView() {
         mFirst.setColorFilter(null);
+
+        //构造动画层
+        setUpAnimateLayout();
+
+        ImageView first = new ImageView(getContext());
+        first.setImageBitmap(mItemBitmaps.get(getImageIdByTag((String)mFirst.getTag())).getBitmap());
+        LayoutParams lp = new LayoutParams(mItemWidth, mItemWidth);
+        lp.leftMargin = mFirst.getLeft() - mPadding;
+        lp.topMargin = mFirst.getTop() - mPadding;
+        first.setLayoutParams(lp);
+        mAnimateLayout.addView(first);
+
+        ImageView second = new ImageView(getContext());
+        second.setImageBitmap(mItemBitmaps.get(getImageIdByTag((String)mSecond.getTag())).getBitmap());
+        LayoutParams lp2 = new LayoutParams(mItemWidth, mItemWidth);
+        lp2.leftMargin = mSecond.getLeft() - mPadding;
+        lp2.topMargin = mSecond.getTop() - mPadding;
+        second.setLayoutParams(lp2);
+        mAnimateLayout.addView(second);
+
+        //设置动画
+        TranslateAnimation animate = new TranslateAnimation(0, -mSecond.getLeft() + mFirst.getLeft(), 0 , -mSecond.getTop() + mFirst.getTop());
+        animate.setDuration(300);
+        animate.setFillAfter(true);
+        first.startAnimation(animate);
+
+        TranslateAnimation animate2 = new TranslateAnimation(0, -mSecond.getLeft() + mFirst.getLeft(), 0 , -mSecond.getTop() + mFirst.getTop());
+        animate2.setDuration(300);
+        animate2.setFillAfter(true);
+        second.startAnimation(animate2);
+
+        //监听动画
+        animate.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                mFirst.setVisibility(View.INVISIBLE);
+                mSecond.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
         String firstTag = (String)mFirst.getTag();
         String secondTag = (String)mSecond.getTag();
 
@@ -197,5 +251,30 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         mSecond = null;
 
 
+    }
+
+    /**
+     * 根据tag获取id
+     * @param tag
+     * @return
+     */
+    public int getImageIdByTag(String tag){
+        String[] params = tag.split("_");
+        return Integer.parseInt(params[0]);
+    }
+
+    public int getImageIndexByTag(String tag){
+        String[] params = tag.split("_");
+        return Integer.parseInt(params[1]);
+    }
+
+    /**
+     * 构造动画层
+     */
+    private void setUpAnimateLayout() {
+        if (mAnimateLayout == null) {
+            mAnimateLayout = new RelativeLayout(getContext());
+            addView(mAnimateLayout);
+        }
     }
 }
