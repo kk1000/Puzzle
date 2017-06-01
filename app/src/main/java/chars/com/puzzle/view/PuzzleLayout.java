@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -58,6 +59,75 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
      */
     private int mWidth;
 
+    private boolean isGameSuccess;
+    private boolean isGameOver;
+
+    public  interface PuzzleListener{
+        void nextLevel(int nextLevel);
+        void timeChanged(int currentTime);
+        void gameOver();
+    }
+
+    public PuzzleListener mListener;
+
+
+    public PuzzleListener getmListener() {
+        return mListener;
+    }
+
+    public void setmListener(PuzzleListener mListener) {
+        this.mListener = mListener;
+    }
+
+    private int level = 1;
+    private static final int TIME_CHANGED = 0x110;
+    private static final int NEXT_LEVEL = 0x111;
+
+    // 是否开启时间
+    private boolean isTimeEnabled = false;
+    // 有多少时间（秒）
+    private int mTime;
+
+    public boolean isTimeEnabled() {
+        return isTimeEnabled;
+    }
+
+    public void setTimeEnabled(boolean timeEnabled) {
+        isTimeEnabled = timeEnabled;
+    }
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(android.os.Message msg){
+            switch (msg.what){
+                case TIME_CHANGED:
+                    if (isGameSuccess || isGameOver || isPause) return;
+
+                    if (mListener != null){
+                        mListener.timeChanged(mTime);
+                        if (mTime == 0) {
+                            isGameOver = true;
+                            mListener.gameOver();
+                            return;
+                        }
+                    }
+                    mTime--;
+                    //延迟1秒发送
+                    mHandler.sendEmptyMessageDelayed(TIME_CHANGED, 1000);
+                    break;
+                case NEXT_LEVEL:
+                    level += 1;
+                    if (mListener != null){
+                        mListener.nextLevel(level);
+                    } else {
+                        nextLevel();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        };
+    };
+
     public PuzzleLayout(Context context) {
         this(context, null);
     }
@@ -88,9 +158,30 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
             initBitmap();
             // 设置ImageView 的宽高等属性
             initItem();
+            //检查是否开启时间限制
+            checkTimeEnable();
             once = true;
         }
         setMeasuredDimension(mWidth, mWidth);
+    }
+
+    /**
+     * 检查是否开启时间限制
+     */
+    private void checkTimeEnable() {
+        if (isTimeEnabled) {
+            //根据当前等级设置时间
+            setTimeByLevel();
+
+            mHandler.sendEmptyMessage(TIME_CHANGED);
+        }
+    }
+
+    /**
+     * 根据当前等级设置时间
+     */
+    private void setTimeByLevel() {
+        mTime = (int)Math.pow(2, level) * 45;
     }
 
     /**
@@ -276,8 +367,12 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
             }
         }
         if (isSuccess) {
+            isGameSuccess = true;
+            mHandler.removeMessages(TIME_CHANGED);
+
             Log.e(TAG, "checkSuccess: sucess");
             Toast.makeText(getContext(), "Success, level up", Toast.LENGTH_LONG).show();
+            mHandler.sendEmptyMessage(NEXT_LEVEL);
         }
     }
 
@@ -303,6 +398,35 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         if (mAnimateLayout == null) {
             mAnimateLayout = new RelativeLayout(getContext());
             addView(mAnimateLayout);
+        }
+    }
+
+    public void nextLevel(){
+        this.removeAllViews();
+        mAnimateLayout = null;
+        mColumn++;
+        isGameSuccess = false;
+        checkTimeEnable();
+        initBitmap();
+        initItem();
+    }
+
+    public void restart(){
+        isGameOver = false;
+        mColumn--;
+        nextLevel();
+    }
+
+    private boolean isPause;
+    public void pause(){
+        isPause = true;
+        mHandler.removeMessages(TIME_CHANGED);
+    }
+
+    public void resume(){
+        if (isPause) {
+            isPause = false;
+            mHandler.sendEmptyMessage(TIME_CHANGED);
         }
     }
 }
