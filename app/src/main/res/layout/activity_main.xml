@@ -12,4 +12,34 @@
         android:padding="3dp"
         android:layout_centerInParent="true"/>
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/id_puzzle"
+        android:layout_margin="3dp">
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:id="@+id/id_level"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#EA0821"
+            android:gravity="center"
+            android:padding="4dp"
+            android:background="@drawable/textbg"
+            android:text="1"/>
+        <TextView
+            android:layout_width="70dp"
+            android:layout_alignParentRight="true"
+            android:layout_height="70dp"
+            android:id="@+id/id_time"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#EA7821"
+            android:gravity="center"
+            android:padding="4dp"
+            android:background="@drawable/textbg"
+            android:text="120"/>
+    </RelativeLayout>
+
 </RelativeLayout>
