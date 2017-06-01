@@ -56,4 +56,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mPuzzleLayout.pause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mPuzzleLayout.resume();
+    }
 }

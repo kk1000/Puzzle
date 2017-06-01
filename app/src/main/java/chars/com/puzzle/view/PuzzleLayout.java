@@ -100,7 +100,7 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         public void handleMessage(android.os.Message msg){
             switch (msg.what){
                 case TIME_CHANGED:
-                    if (isGameSuccess || isGameOver) return;
+                    if (isGameSuccess || isGameOver || isPause) return;
 
                     if (mListener != null){
                         mListener.timeChanged(mTime);
@@ -415,5 +415,18 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         isGameOver = false;
         mColumn--;
         nextLevel();
+    }
+
+    private boolean isPause;
+    public void pause(){
+        isPause = true;
+        mHandler.removeMessages(TIME_CHANGED);
+    }
+
+    public void resume(){
+        if (isPause) {
+            isPause = false;
+            mHandler.sendEmptyMessage(TIME_CHANGED);
+        }
     }
 }
