@@ -5,12 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +21,8 @@ import java.util.List;
 import chars.com.puzzle.R;
 import chars.com.puzzle.util.ImagePiece;
 import chars.com.puzzle.util.ImageSplitter;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by dengw on 2017/5/31.
@@ -248,6 +252,8 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
                 mSecond = null;
 
                 mAnimateLayout.removeAllViews();
+                //判断游戏是否成功
+                checkSuccess();
                 isAnimating = false;
             }
 
@@ -256,6 +262,23 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
 
             }
         });
+    }
+
+    /**
+     * 判断游戏是否成功
+     */
+    private void checkSuccess() {
+        boolean isSuccess = true;
+        for (int i = 0; i < mItems.length; i++) {
+            ImageView imageView = mItems[i];
+            if (getImageIndexByTag((String) imageView.getTag()) != i) {
+                isSuccess = false;
+            }
+        }
+        if (isSuccess) {
+            Log.e(TAG, "checkSuccess: sucess");
+            Toast.makeText(getContext(), "Success, level up", Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
