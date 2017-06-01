@@ -160,9 +160,12 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
     private ImageView mSecond;
     // 动画层
     private RelativeLayout mAnimateLayout;
+    private boolean isAnimating;
 
     @Override
     public void onClick(View v) {
+        if (isAnimating) return;
+
         //两次点击同一个
         if (mFirst == v){
             mFirst.setColorFilter(null);
@@ -190,7 +193,8 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         setUpAnimateLayout();
 
         ImageView first = new ImageView(getContext());
-        first.setImageBitmap(mItemBitmaps.get(getImageIdByTag((String)mFirst.getTag())).getBitmap());
+        final Bitmap firstBitmap = mItemBitmaps.get(getImageIdByTag((String)mFirst.getTag())).getBitmap();
+        first.setImageBitmap(firstBitmap);
         LayoutParams lp = new LayoutParams(mItemWidth, mItemWidth);
         lp.leftMargin = mFirst.getLeft() - mPadding;
         lp.topMargin = mFirst.getTop() - mPadding;
@@ -198,7 +202,8 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         mAnimateLayout.addView(first);
 
         ImageView second = new ImageView(getContext());
-        second.setImageBitmap(mItemBitmaps.get(getImageIdByTag((String)mSecond.getTag())).getBitmap());
+        final Bitmap secondBitmap = mItemBitmaps.get(getImageIdByTag((String)mSecond.getTag())).getBitmap();
+        second.setImageBitmap(secondBitmap);
         LayoutParams lp2 = new LayoutParams(mItemWidth, mItemWidth);
         lp2.leftMargin = mSecond.getLeft() - mPadding;
         lp2.topMargin = mSecond.getTop() - mPadding;
@@ -206,7 +211,7 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         mAnimateLayout.addView(second);
 
         //设置动画
-        TranslateAnimation animate = new TranslateAnimation(0, -mSecond.getLeft() + mFirst.getLeft(), 0 , -mSecond.getTop() + mFirst.getTop());
+        TranslateAnimation animate = new TranslateAnimation(0, mSecond.getLeft() - mFirst.getLeft(), 0 , mSecond.getTop() - mFirst.getTop());
         animate.setDuration(300);
         animate.setFillAfter(true);
         first.startAnimation(animate);
@@ -222,11 +227,28 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
             public void onAnimationStart(Animation animation) {
                 mFirst.setVisibility(View.INVISIBLE);
                 mSecond.setVisibility(View.INVISIBLE);
+                isAnimating = true;
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                String firstTag = (String)mFirst.getTag();
+                String secondTag = (String)mSecond.getTag();
 
+                mSecond.setImageBitmap(firstBitmap);
+                mFirst.setImageBitmap(secondBitmap);
+
+                mFirst.setTag(secondTag);
+                mSecond.setTag(firstTag);
+
+                mFirst.setVisibility(View.VISIBLE);
+                mSecond.setVisibility(View.VISIBLE);
+
+                mFirst = null;
+                mSecond = null;
+
+                mAnimateLayout.removeAllViews();
+                isAnimating = false;
             }
 
             @Override
@@ -234,23 +256,6 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
 
             }
         });
-
-        String firstTag = (String)mFirst.getTag();
-        String secondTag = (String)mSecond.getTag();
-
-        String[] firstParams = firstTag.split("_");
-        String[] secondParams = secondTag.split("_");
-
-        mSecond.setImageBitmap(mItemBitmaps.get(Integer.parseInt(firstParams[0])).getBitmap());
-        mFirst.setImageBitmap(mItemBitmaps.get(Integer.parseInt(secondParams[0])).getBitmap());
-
-        mFirst.setTag(secondTag);
-        mSecond.setTag(firstTag);
-
-        mFirst = null;
-        mSecond = null;
-
-
     }
 
     /**
