@@ -181,7 +181,7 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
      * 根据当前等级设置时间
      */
     private void setTimeByLevel() {
-        mTime = (int)Math.pow(2, level) * 60;
+        mTime = (int)Math.pow(2, level) * 45;
     }
 
     /**
@@ -369,7 +369,7 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         if (isSuccess) {
             isGameSuccess = true;
             mHandler.removeMessages(TIME_CHANGED);
-            
+
             Log.e(TAG, "checkSuccess: sucess");
             Toast.makeText(getContext(), "Success, level up", Toast.LENGTH_LONG).show();
             mHandler.sendEmptyMessage(NEXT_LEVEL);
@@ -409,5 +409,11 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         checkTimeEnable();
         initBitmap();
         initItem();
+    }
+
+    public void restart(){
+        isGameOver = false;
+        mColumn--;
+        nextLevel();
     }
 }

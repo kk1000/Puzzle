@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 new AlertDialog.Builder(MainActivity.this).setTitle("Game Info").setMessage("Game Over").setPositiveButton("Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        mPuzzleLayout.restart();
                     }
                 }).setNegativeButton("Quit", new DialogInterface.OnClickListener() {
                     @Override
