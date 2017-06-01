@@ -3,6 +3,7 @@ package chars.com.puzzle.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -153,8 +154,48 @@ public class PuzzleLayout extends RelativeLayout implements View.OnClickListener
         return min;
     }
 
+    private ImageView mFirst;
+    private ImageView mSecond;
+
     @Override
     public void onClick(View v) {
+        //两次点击同一个
+        if (mFirst == v){
+            mFirst.setColorFilter(null);
+            mFirst = null;
+            return;
+        }
+
+        if (mFirst == null){
+            mFirst = (ImageView)v;
+            mFirst.setColorFilter(Color.parseColor("#55ff0000"));
+        } else {
+            mSecond = (ImageView)v;
+            //交换Item
+            exchangeView();
+        }
+    }
+
+    /**
+     * 交换Item
+     */
+    private void exchangeView() {
+        mFirst.setColorFilter(null);
+        String firstTag = (String)mFirst.getTag();
+        String secondTag = (String)mSecond.getTag();
+
+        String[] firstParams = firstTag.split("_");
+        String[] secondParams = secondTag.split("_");
+
+        mSecond.setImageBitmap(mItemBitmaps.get(Integer.parseInt(firstParams[0])).getBitmap());
+        mFirst.setImageBitmap(mItemBitmaps.get(Integer.parseInt(secondParams[0])).getBitmap());
+
+        mFirst.setTag(secondTag);
+        mSecond.setTag(firstTag);
+
+        mFirst = null;
+        mSecond = null;
+
 
     }
 }
